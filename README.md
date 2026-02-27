@@ -10,11 +10,19 @@ A Spring Boot REST API for managing todos, built as part of my return to coding 
 - Maven
 
 ## Features
-- ✅ Create todos
-- ✅ List all todos
-- ✅ Get todo by ID
-- 🔄 Update todos (coming soon)
-- 🔄 Delete todos (coming soon)
+- ✅ Complete CRUD operations (Create, Read, Update, Delete)
+- ✅ Input validation with custom error messages
+- ✅ Global exception handling
+- ✅ Service layer architecture
+- ✅ RESTful API design
+
+## API Endpoints
+- `GET /api/todos` - Get all todos
+- `GET /api/todos/{id}` - Get todo by ID
+- `POST /api/todos` - Create a new todo
+- `PUT /api/todos/{id}` - Update a todo
+- `DELETE /api/todos/{id}` - Delete a todo
+- `GET /api/health` - Health check
 
 ## Running Locally
 
@@ -32,7 +40,7 @@ docker run --name todo-mysql -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=t
 
 ## API Endpoints
 
-- `GET /api/health` - Health check
+
 - `GET /api/todos` - Get all todos
 - `POST /api/todos` - Create a new todo
 - `GET /api/todos/{id}` - Get todo by ID
