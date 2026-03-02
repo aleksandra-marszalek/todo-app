@@ -1,7 +1,6 @@
 package com.marszalek.todo.controller;
 
 import com.marszalek.todo.model.Todo;
-import com.marszalek.todo.repository.TodoRepository;
 import com.marszalek.todo.service.TodoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

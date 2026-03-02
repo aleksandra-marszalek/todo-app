@@ -5,9 +5,10 @@ A Spring Boot REST API for managing todos, built as part of my return to coding 
 
 ## Tech Stack
 - Java 21
-- Spring Boot 4.0.3
+- Spring Boot 3.3.5
 - MySQL 8
 - Maven
+- Swagger
 
 ## Features
 - ✅ Complete CRUD operations (Create, Read, Update, Delete)
@@ -16,13 +17,6 @@ A Spring Boot REST API for managing todos, built as part of my return to coding 
 - ✅ Service layer architecture
 - ✅ RESTful API design
 
-## API Endpoints
-- `GET /api/todos` - Get all todos
-- `GET /api/todos/{id}` - Get todo by ID
-- `POST /api/todos` - Create a new todo
-- `PUT /api/todos/{id}` - Update a todo
-- `DELETE /api/todos/{id}` - Delete a todo
-- `GET /api/health` - Health check
 
 ## Running Locally
 
@@ -39,11 +33,13 @@ docker run --name todo-mysql -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=t
 3. API will be available at `http://localhost:8080/api`
 
 ## API Endpoints
-
-
 - `GET /api/todos` - Get all todos
-- `POST /api/todos` - Create a new todo
 - `GET /api/todos/{id}` - Get todo by ID
+- `POST /api/todos` - Create a new todo
+- `PUT /api/todos/{id}` - Update a todo
+- `DELETE /api/todos/{id}` - Delete a todo
+- `GET /api/health` - Health check
+
 
 ## What's Next
 - Adding authentication (JWT)
