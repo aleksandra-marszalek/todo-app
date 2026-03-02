@@ -1,5 +1,6 @@
 package com.marszalek.todo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -21,6 +22,11 @@ public class Todo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
+    private User user;
 
     @NotBlank(message = "Title is required")
     @Size(min = 1, max = 100, message = "Title must be between 1 and 100 characters")
