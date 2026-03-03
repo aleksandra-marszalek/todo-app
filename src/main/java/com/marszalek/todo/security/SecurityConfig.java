@@ -33,6 +33,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Fix CORS
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for API
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll() // Allow registration/login
@@ -49,6 +50,7 @@ public class SecurityConfig {
         return http.build();
     }
 
+    //TODO: Update the patterns when FE deployed
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         var configuration = new CorsConfiguration();
