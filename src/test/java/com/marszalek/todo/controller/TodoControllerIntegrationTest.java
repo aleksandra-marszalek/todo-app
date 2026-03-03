@@ -256,4 +256,128 @@ class TodoControllerIntegrationTest extends AbstractIntegrationTest {  // Extend
                         .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    @DisplayName("Should return empty list when user has no todos")
+    void getAllTodos_shouldReturnEmptyList_whenNoTodos() throws Exception {
+        // When & Then
+        mockMvc.perform(get("/api/todos")
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
+    }
+
+    @Test
+    @DisplayName("Should return 404 when todo does not exist")
+    void getTodoById_shouldReturn404_whenTodoDoesNotExist() throws Exception {
+        // When & Then
+        mockMvc.perform(get("/api/todos/99999")
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Should return 400 when updating todo with invalid data")
+    void updateTodo_shouldReturn400_whenInvalidData() throws Exception {
+        // Given
+        var todo = Todo.builder()
+                .title("Original Title")
+                .user(testUser)
+                .completed(false)
+                .build();
+        var savedTodo = todoRepository.save(todo);
+
+        var invalidUpdate = Todo.builder()
+                .title("")
+                .completed(true)
+                .build();
+
+        // When & Then
+        mockMvc.perform(put("/api/todos/" + savedTodo.getId())
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidUpdate)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Should return 404 when updating todo owned by different user")
+    void updateTodo_shouldReturn404_whenOwnedByDifferentUser() throws Exception {
+        // Given
+        var otherUser = User.builder()
+                .username("otheruser")
+                .email("other@example.com")
+                .password("password")
+                .build();
+        userRepository.save(otherUser);
+
+        var otherTodo = Todo.builder()
+                .title("Other's Todo")
+                .user(otherUser)
+                .completed(false)
+                .build();
+        var savedTodo = todoRepository.save(otherTodo);
+
+        var updatedTodo = Todo.builder()
+                .title("Updated Title")
+                .completed(true)
+                .build();
+
+        // When & Then
+        mockMvc.perform(put("/api/todos/" + savedTodo.getId())
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updatedTodo)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Should return 404 when updating non-existent todo")
+    void updateTodo_shouldReturn404_whenTodoDoesNotExist() throws Exception {
+        // Given
+        var updatedTodo = Todo.builder()
+                .title("Updated Title")
+                .completed(true)
+                .build();
+
+        // When & Then
+        mockMvc.perform(put("/api/todos/99999")
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updatedTodo)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Should return 404 when deleting todo owned by different user")
+    void deleteTodo_shouldReturn404_whenOwnedByDifferentUser() throws Exception {
+        // Given
+        var otherUser = User.builder()
+                .username("otheruser")
+                .email("other@example.com")
+                .password("password")
+                .build();
+        userRepository.save(otherUser);
+
+        var otherTodo = Todo.builder()
+                .title("Other's Todo")
+                .user(otherUser)
+                .completed(false)
+                .build();
+        var savedTodo = todoRepository.save(otherTodo);
+
+        // When & Then
+        mockMvc.perform(delete("/api/todos/" + savedTodo.getId())
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Should return 404 when deleting non-existent todo")
+    void deleteTodo_shouldReturn404_whenTodoDoesNotExist() throws Exception {
+        // When & Then
+        mockMvc.perform(delete("/api/todos/99999")
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isNotFound());
+    }
 }

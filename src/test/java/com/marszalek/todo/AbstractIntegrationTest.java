@@ -5,38 +5,30 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 
 @SpringBootTest
-@Testcontainers
 @ActiveProfiles("test")
 public abstract class AbstractIntegrationTest {
 
-    static {
-        // Critical fixes for ARM64/Apple Silicon
-        System.setProperty("testcontainers.ryuk.disabled", "true");
-        System.setProperty("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", "/var/run/docker.sock");
-        System.setProperty("DOCKER_HOST", "unix:///var/run/docker.sock");
-    }
+    // Single shared container for ALL test classes
+    private static final MySQLContainer<?> MYSQL_CONTAINER;
 
-    @Container
-    static MySQLContainer<?> mysql = new MySQLContainer<>(
-            DockerImageName.parse("mysql:8.0")
-                    .asCompatibleSubstituteFor("mysql")
-    )
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test")
-            .withEnv("MYSQL_ROOT_HOST", "%")
-            .withReuse(true);
+    static {
+        MYSQL_CONTAINER = new MySQLContainer<>(DockerImageName.parse("mysql:8.0"))
+                .withDatabaseName("testdb")
+                .withUsername("test")
+                .withPassword("test")
+                .withReuse(true);  // Reuse between test runs
+
+        MYSQL_CONTAINER.start();  // Start once, reuse for all tests
+    }
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", mysql::getJdbcUrl);
-        registry.add("spring.datasource.username", mysql::getUsername);
-        registry.add("spring.datasource.password", mysql::getPassword);
+        registry.add("spring.datasource.url", MYSQL_CONTAINER::getJdbcUrl);
+        registry.add("spring.datasource.username", MYSQL_CONTAINER::getUsername);
+        registry.add("spring.datasource.password", MYSQL_CONTAINER::getPassword);
     }
 }

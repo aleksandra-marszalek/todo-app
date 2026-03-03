@@ -209,4 +209,109 @@ class TodoServiceTest {
         assertFalse(result);
         verify(todoRepository, never()).delete(any(Todo.class));
     }
+
+    @Test
+    @DisplayName("Should return empty when todo not found by ID")
+    void getTodoById_shouldReturnEmpty_whenTodoNotFound() {
+        // Given
+        when(securityUtil.getCurrentUser()).thenReturn(testUser);
+        when(todoRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // When
+        var result = todoService.getTodoById(99L);
+
+        // Then
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    @DisplayName("Should return empty list when user has no todos")
+    void getAllTodos_shouldReturnEmptyList_whenNoTodos() {
+        // Given
+        when(securityUtil.getCurrentUser()).thenReturn(testUser);
+        when(todoRepository.findByUserId(testUser.getId())).thenReturn(List.of());
+
+        // When
+        var result = todoService.getAllTodos();
+
+        // Then
+        assertTrue(result.isEmpty());
+        verify(todoRepository).findByUserId(testUser.getId());
+    }
+
+    @Test
+    @DisplayName("Should return empty when updating non-existent todo")
+    void updateTodo_shouldReturnEmpty_whenTodoNotFound() {
+        // Given
+        when(securityUtil.getCurrentUser()).thenReturn(testUser);
+        when(todoRepository.findById(99L)).thenReturn(Optional.empty());
+
+        var updatedDetails = Todo.builder().title("New Title").completed(false).build();
+
+        // When
+        var result = todoService.updateTodoById(99L, updatedDetails);
+
+        // Then
+        assertFalse(result.isPresent());
+        verify(todoRepository, never()).save(any(Todo.class));
+    }
+
+    @Test
+    @DisplayName("Should preserve existing title when update title is blank")
+    void updateTodo_shouldPreserveTitle_whenNewTitleIsBlank() {
+        // Given
+        var updateWithBlankTitle = Todo.builder()
+                .title("")
+                .description("New Description")
+                .completed(true)
+                .build();
+
+        when(securityUtil.getCurrentUser()).thenReturn(testUser);
+        when(todoRepository.findById(1L)).thenReturn(Optional.of(testTodo));
+        when(todoRepository.save(any(Todo.class))).thenReturn(testTodo);
+
+        // When
+        var result = todoService.updateTodoById(1L, updateWithBlankTitle);
+
+        // Then
+        assertTrue(result.isPresent());
+        assertEquals("Test Todo", result.get().getTitle());
+    }
+
+    @Test
+    @DisplayName("Should preserve existing description when update description is blank")
+    void updateTodo_shouldPreserveDescription_whenNewDescriptionIsBlank() {
+        // Given
+        var updateWithBlankDescription = Todo.builder()
+                .title("New Title")
+                .description("")
+                .completed(false)
+                .build();
+
+        when(securityUtil.getCurrentUser()).thenReturn(testUser);
+        when(todoRepository.findById(1L)).thenReturn(Optional.of(testTodo));
+        when(todoRepository.save(any(Todo.class))).thenReturn(testTodo);
+
+        // When
+        var result = todoService.updateTodoById(1L, updateWithBlankDescription);
+
+        // Then
+        assertTrue(result.isPresent());
+        assertEquals("Test Description", result.get().getDescription());
+    }
+
+    @Test
+    @DisplayName("Should return false when deleting non-existent todo")
+    void deleteTodo_shouldReturnFalse_whenTodoNotFound() {
+        // Given
+        when(securityUtil.getCurrentUser()).thenReturn(testUser);
+        when(todoRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // When
+        var result = todoService.deleteTodo(99L);
+
+        // Then
+        assertFalse(result);
+        verify(todoRepository, never()).delete(any(Todo.class));
+    }
 }
