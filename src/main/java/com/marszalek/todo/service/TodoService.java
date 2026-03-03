@@ -6,6 +6,7 @@ import com.marszalek.todo.repository.TodoRepository;
 import com.marszalek.todo.util.SecurityUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,44 +20,43 @@ import static org.apache.logging.log4j.util.Strings.isNotBlank;
 public class TodoService {
 
     private final TodoRepository todoRepository;
+    private final SecurityUtil securityUtil;
 
     private User getCurrentUser() {
-        return SecurityUtil.getCurrentUser();
+        return securityUtil.getCurrentUser();
     }
 
     public Todo save(Todo todo) {
-        var currentUser = getCurrentUser();
+        User currentUser = securityUtil.getCurrentUser();
         todo.setUser(currentUser);
-        return todoRepository.save(todo);
+
+        log.debug("Saving todo '{}' for user '{}'", todo.getTitle(), currentUser.getUsername());
+
+        try {
+            return todoRepository.save(todo);
+        } catch (DataAccessException e) {
+            log.error("Failed to save todo for user {}: {}", currentUser.getUsername(), e.getMessage());
+            throw e;
+        }
     }
 
     public Optional<Todo> getTodoById(Long id) {
-        var currentUser = getCurrentUser();
+        User currentUser = securityUtil.getCurrentUser();
         Optional<Todo> todo = todoRepository.findById(id);
 
         if (todo.isPresent() && !todo.get().getUser().getId().equals(currentUser.getId())) {
-            log.warn("User {} attempted viewing todo {} without access", currentUser.getId(), todo.get().getId());
-            return Optional.empty(); // Don't let users see other people's todos
+            log.warn("User {} attempted to access todo {} owned by another user",
+                    currentUser.getUsername(), id);
+            return Optional.empty();
         }
 
         return todo;
     }
 
     public List<Todo> getAllTodos() {
-        var currentUser = getCurrentUser();
+        User currentUser = securityUtil.getCurrentUser();
+        log.debug("Fetching todos for user: {}", currentUser.getUsername());
         return todoRepository.findByUserId(currentUser.getId());
-    }
-
-    public boolean deleteTodo(Long id) {
-        User currentUser = getCurrentUser();
-
-        return todoRepository.findById(id)
-                .filter(todo -> todo.getUser().getId().equals(currentUser.getId())) // Only delete if owned by user
-                .map(todo -> {
-                    todoRepository.delete(todo);
-                    return true;
-                })
-                .orElse(false);
     }
 
     public Optional<Todo> updateTodoById(Long id, Todo todo) {
@@ -73,5 +73,18 @@ public class TodoService {
                     t.setCompleted(todo.getCompleted());
                     return todoRepository.save(t);
                 });
+    }
+
+    public boolean deleteTodo(Long id) {
+        User currentUser = securityUtil.getCurrentUser();
+
+        return todoRepository.findById(id)
+                .filter(todo -> todo.getUser().getId().equals(currentUser.getId()))
+                .map(todo -> {
+                    log.debug("Deleting todo {} for user {}", id, currentUser.getUsername());
+                    todoRepository.delete(todo);
+                    return true;
+                })
+                .orElse(false);
     }
 }
