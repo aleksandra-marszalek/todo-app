@@ -263,11 +263,15 @@ spring.datasource.password=password
 ```
 
 ## Security Features
-- Passwords hashed with BCrypt (12 rounds)
-- JWT tokens expire after 24 hours
-- Stateless authentication (no sessions)
-- Users can only access their own todos
-- CORS configured for cross-origin requests
+**Current Implementation:**
+* **Password Security**: BCrypt hashing with 12 rounds (Spring Security default)
+* **Authentication**: JWT-based stateless authentication (signed with HS256)
+* **Token Lifecycle**: 24-hour expiration with signature validation on every request
+* **Data Isolation**: Repository-level filtering ensures users only access their own todos
+* **CORS Protection**: Restricted to specific frontend origins (localhost + Vercel)
+
+**Production Considerations:**  
+JWTs prioritize stateless scalability over immediate revocation. For production high security / financial apps, I would add: refresh tokens in HttpOnly cookies, token blacklist (Redis), MFA, and rate limiting.
 
 ## Common Issues
 
