@@ -3,6 +3,7 @@ package com.marszalek.todo.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.marszalek.todo.AbstractIntegrationTest;
+import com.marszalek.todo.error.ErrorMessage;
 import com.marszalek.todo.model.dto.LoginRequest;
 import com.marszalek.todo.model.dto.RegisterRequest;
 import com.marszalek.todo.repository.UserRepository;
@@ -81,8 +82,8 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(duplicateUser)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string(containsString("Username already taken")));
+                .andExpect(status().isConflict())
+                .andExpect(content().string(containsString(ErrorMessage.USERNAME_ALREADY_TAKEN.getMessage())));
     }
 
     @Test
@@ -108,8 +109,8 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(duplicateUser)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string(containsString("Email already registered")));
+                .andExpect(status().isConflict())
+                .andExpect(content().string(containsString(ErrorMessage.EMAIL_ALREADY_REGISTERED.getMessage())));
     }
 
     @Test
@@ -228,7 +229,7 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized())
-                .andExpect(content().string(containsString("Invalid username or password")));
+                .andExpect(content().string(containsString(ErrorMessage.INVALID_CREDENTIALS.getMessage())));
     }
 
     @Test
@@ -244,7 +245,7 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized())
-                .andExpect(content().string(containsString("Invalid username or password")));
+                .andExpect(content().string(containsString(ErrorMessage.INVALID_CREDENTIALS.getMessage())));
     }
 
     @Test
