@@ -143,7 +143,7 @@ java -jar target/todo-0.0.1-SNAPSHOT.jar
 ```bash
 ./mvnw test -Dtest=TodoServiceTest
 ./mvnw test -Dtest=TodoControllerIntegrationTest
-./mvnw test -Dtest=AuthControllerIntegrationTest
+./mvnw test -Dtest=AuthControllerTest
 ```
 
 **Run tests with coverage report:**
@@ -256,15 +256,21 @@ spring.datasource.password=password
 
 ## Architecture
 ```
-├── controller/     # REST endpoints
-├── service/        # Business logic
-├── repository/     # Data access (Spring Data JPA)
-├── model/          # JPA entities (User, Todo)
-├── security/       # JWT utilities, filters, and Spring Security config
-├── dto/            # Data transfer objects
-├── exception/      # Global exception handler
-├── config/         # Spring configuration (CORS, OpenAPI)
-└── util/           # Utility classes (SecurityUtil)
+src/main/java/com/marszalek/todo/
+├── TodoApplication.java
+├── config/             # Spring configuration (CORS, OpenAPI)
+├── controller/         # REST endpoints (Auth, Todo, Health)
+├── error/              # Global exception handler, error models
+├── model/              # JPA entities (User, Todo)
+│   └── dto/            # Data transfer objects (LoginRequest, RegisterRequest, AuthResponse)
+├── repository/         # Data access (Spring Data JPA)
+├── security/           # JWT utilities, filters, and Spring Security config
+├── service/            # Business logic (TodoService, UserService, JwtService)
+└── util/               # Utility classes (SecurityUtil)
+
+doc/
+└── architecture/
+    └── decisions/      # Architecture Decision Records (ADRs)
 ```
 
 ## Security Features
