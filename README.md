@@ -4,7 +4,7 @@
 
 ## 🚀 Live Demo
 
-![Todo App Demo](doc/videos/demo-desktop-small.gif)
+![Todo App Demo](doc/videos/demo-desktop-small-2.gif)
 
 **Production FE app:** https://todo-app-frontend-silk-one.vercel.app/
 
