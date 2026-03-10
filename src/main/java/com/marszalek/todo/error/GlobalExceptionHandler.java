@@ -9,23 +9,38 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
+/**
+ * Global exception handler that translates application exceptions into structured
+ * {@link ErrorResponse} payloads.
+ *
+ * <p>Annotated with {@link Hidden} to exclude it from the OpenAPI documentation,
+ * as error shapes are documented on individual endpoint operations.</p>
+ */
 @Hidden
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    /**
+     * Handles bean validation failures triggered by {@code @Valid} on controller method parameters.
+     *
+     * <p>Each field error is included in the response as a {@code "field: message"} string.</p>
+     *
+     * @param ex      the validation exception containing individual field errors
+     * @param request the current web request, used to populate the error path
+     * @return {@code 400 Bad Request} with a structured {@link ErrorResponse}
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(
             MethodArgumentNotValidException ex, WebRequest request) {
 
-        List<String> errors = ex.getBindingResult()
+        var errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .toList();
 
-        ErrorResponse errorResponse = new ErrorResponse(
+        var errorResponse = new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.BAD_REQUEST.value(),
                 HttpStatus.BAD_REQUEST.name(),

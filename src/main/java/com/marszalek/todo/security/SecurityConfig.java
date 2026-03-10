@@ -26,6 +26,19 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Central Spring Security configuration for the application.
+ *
+ * <p>Configures a stateless, JWT-based security model:
+ * <ul>
+ *   <li>CSRF protection is disabled (not applicable for stateless REST APIs)</li>
+ *   <li>Sessions are never created; every request must carry a valid Bearer token</li>
+ *   <li>Public endpoints ({@code /api/auth/**}, {@code /api/health}, Swagger UI) are permitted with no auth</li>
+ *   <li>All other endpoints require authentication</li>
+ *   <li>Unauthenticated requests receive a JSON 401 response</li>
+ * </ul>
+ * </p>
+ */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -37,25 +50,32 @@ public class SecurityConfig {
     @Value("${cors.allowed-origins}")
     private String allowedOrigins;
 
+    /**
+     * Builds the primary security filter chain.
+     *
+     * @param http the {@link HttpSecurity} builder provided by Spring
+     * @return the configured {@link SecurityFilterChain}
+     * @throws Exception if an error occurs during configuration
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Fix CORS
-                .csrf(AbstractHttpConfigurer::disable) // Disable CSRF for API
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll() // Allow registration/login
-                        .requestMatchers("/api/health").permitAll()  // Allow health check
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll() // Allow Swagger
-                        .anyRequest().authenticated() // Everything else needs auth
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/health").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // No sessions, JWT only
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint((request, response, authException) -> {
-                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);  // 401
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("application/json");
                             response.getWriter().write(ErrorMessage.AUTHENTICATION_REQUIRED.getMessage());
                         }));
@@ -63,13 +83,15 @@ public class SecurityConfig {
         return http.build();
     }
 
-
+    /**
+     * Configures CORS to allow requests from the origins listed in {@code cors.allowed-origins}.
+     *
+     * @return the {@link CorsConfigurationSource} used by the security filter chain
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         var configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(
-                Arrays.asList(allowedOrigins.split(","))
-        );
+        configuration.setAllowedOriginPatterns(Arrays.asList(allowedOrigins.split(",")));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
@@ -79,19 +101,36 @@ public class SecurityConfig {
         return source;
     }
 
+    /**
+     * Creates a DAO-backed {@link AuthenticationProvider} using BCrypt password verification.
+     *
+     * @return the configured {@link AuthenticationProvider}
+     */
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        var authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
 
+    /**
+     * Exposes the {@link AuthenticationManager} from the current security configuration.
+     *
+     * @param config the Spring-managed {@link AuthenticationConfiguration}
+     * @return the resolved {@link AuthenticationManager}
+     * @throws Exception if the manager cannot be retrieved
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
+    /**
+     * Provides a BCrypt {@link PasswordEncoder} for hashing and verifying passwords.
+     *
+     * @return the {@link PasswordEncoder} bean
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

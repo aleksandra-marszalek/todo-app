@@ -10,6 +10,13 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * JPA entity representing an application user.
+ *
+ * <p>Implements {@link UserDetails} so it can be used directly as the Spring Security
+ * principal, eliminating an extra adapter layer. All accounts are enabled and non-expired
+ * by default.</p>
+ */
 @Entity
 @Table(name = "users")
 @Data
@@ -43,10 +50,14 @@ public class User implements UserDetails {
         createdAt = LocalDateTime.now();
     }
 
-    // UserDetails implementation - required for Spring Security
+    /**
+     * Returns the authorities granted to this user.
+     *
+     * <p>Currently returns an empty collection; role-based permissions can be added here.</p>
+     */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(); // No roles for now, just basic auth
+        return List.of();
     }
 
     @Override

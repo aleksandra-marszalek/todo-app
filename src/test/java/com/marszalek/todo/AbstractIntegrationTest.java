@@ -7,12 +7,18 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
-
+/**
+ * Base class for all Spring Boot integration tests.
+ *
+ * <p>Starts a single shared {@link MySQLContainer} for the entire test suite using the
+ * {@code test} profile, which configures an in-memory schema via {@code create-drop} DDL.
+ * Subclasses receive the container's JDBC URL via {@link DynamicPropertySource}, replacing
+ * any datasource configuration from {@code application.properties}.</p>
+ */
 @SpringBootTest
 @ActiveProfiles("test")
 public abstract class AbstractIntegrationTest {
 
-    // Single shared container for ALL test classes
     private static final MySQLContainer<?> MYSQL_CONTAINER;
 
     static {
@@ -20,9 +26,9 @@ public abstract class AbstractIntegrationTest {
                 .withDatabaseName("testdb")
                 .withUsername("test")
                 .withPassword("test")
-                .withReuse(true);  // Reuse between test runs
+                .withReuse(true);
 
-        MYSQL_CONTAINER.start();  // Start once, reuse for all tests
+        MYSQL_CONTAINER.start();
     }
 
     @DynamicPropertySource
