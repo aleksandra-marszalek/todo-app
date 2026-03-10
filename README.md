@@ -1,10 +1,15 @@
 # Todo API
 
-A Spring Boot REST API for managing todos with JWT authentication, built as part of my return to coding after a career break.
+*Full-stack application featuring JWT authentication, real-time updates, toast notifications, and responsive design.*
 
 ## 🚀 Live Demo
 
-**Production API:** https://todo-app-production-218b.up.railway.app  
+![Todo App Demo](doc/videos/demo-desktop-small.gif)
+
+**Production FE app:** https://todo-app-frontend-silk-one.vercel.app/
+
+**Production API:** https://todo-app-production-218b.up.railway.app  (needs authentication)
+
 **Swagger Documentation:** https://todo-app-production-218b.up.railway.app/swagger-ui/index.html
 
 Try it out:
@@ -273,6 +278,10 @@ spring.datasource.password=password
 **Production Considerations:**  
 JWTs prioritize stateless scalability over immediate revocation. For production high security / financial apps, I would add: refresh tokens in HttpOnly cookies, token blacklist (Redis), MFA, and rate limiting.
 
+## Observability
+Using Railway built-in dashboards.
+![Dashboards view](doc/videos/observability.png)
+
 ## Common Issues
 
 **Port 3306 already in use:**
@@ -293,7 +302,7 @@ kill -9 <PID>
 This project helped me get back into modern Java development after a career break:
 - **Testing best practices** with Testcontainers and proper test isolation
 - **Spring Security 6** with JWT authentication
-- **Modern Java features** (Java 21, `var`, records-ready architecture)
-- **Production deployment** with Railway and environment-based configuration
+- **Modern Java features** 
+- **Production deployment** using Railway
 - **Clean architecture** with proper separation of concerns
 - **API documentation** with OpenAPI/Swagger
