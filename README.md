@@ -2,28 +2,11 @@
 
 *Full-stack application featuring JWT authentication, real-time updates, toast notifications, and responsive design.*
 
-## 🚀 Live Demo
+## Demo
 
 ![Todo App Demo](doc/videos/demo-desktop-small-2.gif)
 
-**Production FE app:** https://todo-app-frontend-silk-one.vercel.app/
-
-**Production API:** https://todo-app-production-218b.up.railway.app  (needs authentication)
-
-**Swagger Documentation:** https://todo-app-production-218b.up.railway.app/swagger-ui/index.html
-
-Try it out:
-```bash
-# Register a new user
-curl -X POST https://todo-app-production-218b.up.railway.app/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"username":"demo","email":"demo@example.com","password":"password123"}'
-
-# Login
-curl -X POST https://todo-app-production-218b.up.railway.app/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"demo","password":"password123"}'
-```
+> **Status:** the hosted demo (Railway API + Vercel frontend) has been retired to save hosting costs. The demo recording above shows the app in action, and the app runs locally (see "Running Locally" below).
 
 ## Tech Stack
 - Java 21
@@ -45,7 +28,7 @@ curl -X POST https://todo-app-production-218b.up.railway.app/api/auth/login \
 - ✅ RESTful API design
 - ✅ Interactive API documentation with Swagger
 - ✅ **Comprehensive test coverage (80%+) with Testcontainers**
-- ✅ **Deployed to production on Railway**
+- ✅ **Was deployed to production on Railway (since retired)**
 
 ## Prerequisites
 
@@ -249,8 +232,8 @@ spring.datasource.password=password
 
 ## Deployment
 
-**Platform:** Railway  
-**Database:** Railway MySQL 8  
+**Platform:** Railway (retired)  
+**Database:** MySQL 8 (Railway, retired)  
 **CI/CD:** Automated deployment from GitHub main branch  
 **Environment:** Production-ready with environment-based configuration
 
@@ -309,6 +292,6 @@ This project helped me get back into modern Java development after a career brea
 - **Testing best practices** with Testcontainers and proper test isolation
 - **Spring Security 6** with JWT authentication
 - **Modern Java features** 
-- **Production deployment** using Railway
+- **Production deployment** on Railway (since retired)
 - **Clean architecture** with proper separation of concerns
 - **API documentation** with OpenAPI/Swagger
